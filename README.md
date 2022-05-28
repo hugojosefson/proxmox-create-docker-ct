@@ -31,7 +31,7 @@ This means, that to deploy a new application, you...
 ### Install create-docker-ct
 
 ```sh
-curl -sSfL -o /usr/local/bin/create-docker-ct https://raw.githubusercontent.com/hugojosefson/proxmox-pve-lxc-docker-compose/main/src/create-docker-ct
+curl -sSfL -o /usr/local/bin/create-docker-ct https://raw.githubusercontent.com/hugojosefson/proxmox-pve-lxc-docker-compose/main/create-docker-ct
 
 chmod +x /usr/local/bin/create-docker-ct
 ```
