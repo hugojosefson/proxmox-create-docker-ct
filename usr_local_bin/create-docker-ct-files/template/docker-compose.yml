@@ -1,0 +1,10 @@
+version: "3.9"
+
+services:
+  app:
+    image: docker.io/traefik/whoami
+    environment:
+      - PORT="80"
+    ports: [ "80:80" ]
+    # volumes:
+    #   - ./data:/data:ro
