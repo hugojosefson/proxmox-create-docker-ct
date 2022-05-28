@@ -64,7 +64,7 @@ export async function getStorage(
       `Could not find any active storage that supports ${descriptive}.`,
     );
   }
-  if (storages[0]) {
+  if (storages.length === 1 && storages[0]) {
     return storages[0];
   }
 
