@@ -9,34 +9,16 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { parseColumns } from "./parse-columns.ts";
 import { j } from "./fn.ts";
-import { run } from "./run.ts";
+import { existsCtTemplate, getCtTemplates } from "./os.ts";
 
 const CT_BASE_TEMPLATE_FILENAME = "ubuntu-22.04-standard_22.04-1_amd64.tar.zst";
 const DOCKER_CT_TEMPLATE_NAME = "docker-ct-ubuntu-2204";
 const DOCKER_CT_TEMPLATE_FILENAME = `docker-ct-${CT_BASE_TEMPLATE_FILENAME}`;
 
-async function existsCtTemplate(name: string): Promise<boolean> {
-  return (await getCtTemplates()).some((pctEntry) => pctEntry?.name === name);
-}
-
-interface PctEntry {
-  vmid: number;
-  status: string;
-  lock?: unknown;
-  name: string;
-}
-
-async function getCtTemplates(): Promise<PctEntry[]> {
-  return parseColumns(await run("pct list")) as unknown as PctEntry[];
-}
-
-console.log(j(await getCtTemplates()));
-console.log(
-  `We have ${DOCKER_CT_TEMPLATE_NAME}?  =>  ${await existsCtTemplate(
-    DOCKER_CT_TEMPLATE_NAME,
-  )}`,
-);
+const templates = await getCtTemplates();
+const doWeHaveIt: boolean = await existsCtTemplate(DOCKER_CT_TEMPLATE_NAME);
+console.log(j(templates));
+console.log(`We have ${DOCKER_CT_TEMPLATE_NAME}: ${doWeHaveIt}`);
 
 //🔚
