@@ -1,17 +1,21 @@
-import { parseColumns } from "./parse-columns.ts";
-import { run } from "./run.ts";
+import { columnRun } from "./run.ts";
 
-export async function existsCtTemplate(name: string): Promise<boolean> {
-  return (await getCtTemplates()).some((pctEntry) => pctEntry?.name === name);
-}
+export type VMID = number;
 
 export interface PctEntry {
-  vmid: number;
+  vmid: VMID;
   status: string;
   lock?: unknown;
   name: string;
 }
 
+export async function getCtTemplate(
+  name: string,
+): Promise<PctEntry | undefined> {
+  const templates = await getCtTemplates();
+  return templates.find((template) => template.name === name);
+}
+
 export async function getCtTemplates(): Promise<PctEntry[]> {
-  return parseColumns(await run("pct list")) as unknown as PctEntry[];
+  return await columnRun("pct list") as unknown as PctEntry[];
 }
