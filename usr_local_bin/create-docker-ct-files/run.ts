@@ -42,10 +42,12 @@ async function tryRun(cmd: string[], stdin?: string): Promise<string> {
 }
 
 export async function run(
-  command: string | string[],
+  command: string | (string | number | boolean)[],
   stdin?: string,
 ): Promise<string> {
-  const cmd: string[] = isString(command) ? command.split(" ") : command;
+  const cmd: string[] = isString(command)
+    ? command.split(" ")
+    : command.map((segment) => `${segment}`);
   try {
     return await tryRun(cmd, stdin);
   } catch (error) {
@@ -55,7 +57,7 @@ export async function run(
 }
 
 export async function columnRun<T>(
-  command: string | string[],
+  command: string | (string | number | boolean)[],
   stdin?: string,
 ): Promise<T[]> {
   return parseColumns<T>(await run(command, stdin));

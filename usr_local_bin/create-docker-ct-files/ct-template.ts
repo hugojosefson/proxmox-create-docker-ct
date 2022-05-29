@@ -1,7 +1,6 @@
 import { getCtTemplate, PctEntry, VMID } from "./os.ts";
 import { run } from "./run.ts";
-import { parseJsonSafe } from "./fn.ts";
-import { CONTENT_CT_TEMPLATE, getStorage, StorageRow } from "./storage.ts";
+import { CONTENT_CT_TEMPLATE, StorageRow } from "./storage.ts";
 import { readFromUrl } from "./read-from-url.ts";
 
 type CtTemplateOptions = {
@@ -27,10 +26,10 @@ export async function createCtTemplate(
   await run([
     "pct",
     "create",
-    `${vmid}`,
+    vmid,
     templateVolumeId,
     "--cores",
-    `${options.cores ?? 2}`,
+    options.cores ?? 2,
     "--description",
     (await readFromUrl(new URL("template/summary.md", import.meta.url)))
       .replaceAll("${APP_NAME}", options.name)
@@ -40,31 +39,31 @@ export async function createCtTemplate(
     "--hostname",
     options.name,
     "--memory",
-    `${options.memoryMegabytes ?? 2048}`,
+    options.memoryMegabytes ?? 2048,
     "--swap",
-    `${options.memoryMegabytes ?? 2048}`,
+    options.memoryMegabytes ?? 2048,
     "--net0",
     "name=eth0,bridge=vmbr0,firewall=1,ip=dhcp",
     "--ostype",
     options.baseFilename.split("-")[0],
     "--ssh-public-keys",
     "/root/.ssh/authorized_keys",
-    // "--rootfs",
-    // `volume=${await allocateVolume(
-    //   (await getStorage(CONTENT_VM_IMAGE, `rootfs for ${options.name}`)).name,
-    //   vmid,
-    //   "8G",
-    //   "raw",
-    // )}`,
     "--timezone",
     "host",
     "--template",
-    "1",
+    0,
     "--storage",
     (await options.storage()).name,
     "--unprivileged",
-    "1",
+    1,
   ]);
+  await run(["pct", "start", vmid]);
+  await run(
+    ["pct", "exec", vmid, "--", "/bin/sh"],
+    await readFromUrl(new URL("template/install.sh", import.meta.url)),
+  );
+  await run(["pct", "shutdown", vmid]);
+  await run(["pct", "template", vmid]);
   return vmid;
 }
 

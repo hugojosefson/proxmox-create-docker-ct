@@ -13,7 +13,7 @@ apt-get auto-remove -y
 apt-get install -y curl
 
 curl https://get.docker.com/ | sh
-docker run --rm -it hello-world
+docker run --rm hello-world
 
 DOCKER_COMPOSE_VERSION="$(curl -sSfL https://api.mattandre.ws/semver/github/docker/compose)"
 curl -sSfL -o /usr/local/bin/docker-compose "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-linux-x86_64"
@@ -41,9 +41,7 @@ echo "
 
 "
 docker --version
-docker-compose --version
+/usr/local/bin/docker-compose --version
 
 extra_commands
-
 apt-get clean
-poweroff

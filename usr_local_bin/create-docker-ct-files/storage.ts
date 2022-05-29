@@ -102,7 +102,7 @@ export async function allocateVolume(
     "pvesm",
     "alloc",
     storage,
-    `${vmid}`,
+    vmid,
     name,
     size,
     "--format",
