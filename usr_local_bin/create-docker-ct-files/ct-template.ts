@@ -2,6 +2,7 @@ import { getCtTemplate, PctEntry, VMID } from "./os.ts";
 import { run } from "./run.ts";
 import { CONTENT_CT_TEMPLATE, StorageRow } from "./storage.ts";
 import { readFromUrl } from "./read-from-url.ts";
+import { getNetworkInterface } from "./network.ts";
 
 type CtTemplateOptions = {
   baseTemplateStorage: () => Promise<StorageRow>;
@@ -43,7 +44,9 @@ export async function createCtTemplate(
     "--swap",
     options.memoryMegabytes ?? 2048,
     "--net0",
-    "name=eth0,bridge=vmbr0,firewall=1,ip=dhcp",
+    `name=eth0,bridge=${((await getNetworkInterface(
+      "bridge",
+    )).name)},firewall=1,ip=dhcp`,
     "--ostype",
     options.baseFilename.split("-")[0],
     "--ssh-public-keys",

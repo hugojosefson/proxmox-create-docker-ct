@@ -1,4 +1,4 @@
-import { asString, isString, j } from "./fn.ts";
+import { asString, isString, j, parseJsonSafe } from "./fn.ts";
 import { weakEnvGet } from "./os.ts";
 import { parseColumns } from "./parse-columns.ts";
 
@@ -89,4 +89,11 @@ export async function columnRun<T>(
   options: RunOptions = defaultRunOptions,
 ): Promise<T[]> {
   return parseColumns<T>(await run(command, options));
+}
+
+export async function jsonRun<T>(
+  command: string | SimpleValue[],
+  options: RunOptions = defaultRunOptions,
+): Promise<T> {
+  return parseJsonSafe(await run(command, options)) as T;
 }
