@@ -1,5 +1,8 @@
-import { columnRun } from "./run.ts";
+import { columnRun, run } from "./run.ts";
 import { chooseOne } from "./prompt.ts";
+import { VMID } from "./os.ts";
+import { execAll, Match } from "./deps.ts";
+import { isString, j } from "./fn.ts";
 
 export type StorageType =
   | "zfspool"
@@ -53,6 +56,8 @@ export const CONTENT_ISO = "iso" as const;
 /** Snippet files, for example guest hook scripts */
 export const CONTENT_SNIPPET = "snippets" as const;
 
+export type VolumeFormat = "raw" | "qcow2";
+
 export async function getStorage(
   content: ContentType,
   descriptive = `"${content}" content`,
@@ -84,4 +89,40 @@ export async function getStorages(
     "-enabled",
     ...(content ? ["-content", content] : []),
   ]);
+}
+
+export async function allocateVolume(
+  storage: string,
+  vmid: VMID,
+  size: string,
+  format: VolumeFormat,
+  name = "",
+): Promise<string> {
+  const cmd = [
+    "pvesm",
+    "alloc",
+    storage,
+    `${vmid}`,
+    name,
+    size,
+    "--format",
+    format,
+  ];
+  const stdout = await run(cmd);
+  const matches: Match[] = execAll(/^successfully created '([^']+)'/gm, stdout);
+  const subMatchess: string[][] = matches.map((match) => match.subMatches);
+  if (subMatchess.length === 1) {
+    const subMatches: string[] = subMatchess[0];
+    if (subMatches.length === 1) {
+      const volume: string | undefined = subMatches[0];
+      if (isString(volume)) {
+        return volume;
+      }
+    }
+  }
+  throw new Error(
+    `Did not get exactly 1 successful volume when allocating. ${
+      j({ cmd, stdout, matches, subMatchess })
+    }`,
+  );
 }

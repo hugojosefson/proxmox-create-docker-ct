@@ -10,13 +10,24 @@
  */
 
 import { ensureExistsCtTemplate } from "./ct-template.ts";
+import { CONTENT_CT_TEMPLATE, getStorage } from "./storage.ts";
 
 const CT_BASE_TEMPLATE_FILENAME = "ubuntu-22.04-standard_22.04-1_amd64.tar.zst";
 const DOCKER_CT_TEMPLATE_NAME = "docker-ct-ubuntu-2204";
 const DOCKER_CT_TEMPLATE_FILENAME = `docker-ct-${CT_BASE_TEMPLATE_FILENAME}`;
 
 const templateId: number = await ensureExistsCtTemplate({
+  baseTemplateStorage: () =>
+    getStorage(
+      CONTENT_CT_TEMPLATE,
+      CT_BASE_TEMPLATE_FILENAME,
+    ),
   baseFilename: CT_BASE_TEMPLATE_FILENAME,
+  storage: () =>
+    getStorage(
+      CONTENT_CT_TEMPLATE,
+      DOCKER_CT_TEMPLATE_FILENAME,
+    ),
   name: DOCKER_CT_TEMPLATE_NAME,
   filename: DOCKER_CT_TEMPLATE_FILENAME,
 });
