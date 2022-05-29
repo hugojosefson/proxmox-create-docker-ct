@@ -71,6 +71,7 @@ export async function getStorage(
 
   const choice: string = await Select.prompt({
     message,
+    search: true,
     options: await toSelectOptions(
       storages as unknown as Record<string, unknown>[],
       "name",
