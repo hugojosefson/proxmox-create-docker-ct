@@ -1,6 +1,5 @@
 import { columnRun } from "./run.ts";
-import { Select } from "./deps.ts";
-import { j, toSelectOptions } from "./fn.ts";
+import { chooseOne } from "./prompt.ts";
 
 export type StorageType =
   | "zfspool"
@@ -59,33 +58,21 @@ export async function getStorage(
   descriptive = `"${content}" content`,
   message = `Pick a storage for ${descriptive}.`,
 ): Promise<StorageRow> {
-  const storages: StorageRow[] = await getStorages(content);
-  if (storages.length === 0) {
+  const choices: StorageRow[] = await getStorages(content);
+  if (choices.length === 0) {
     throw new Error(
       `Could not find any active storage that supports ${descriptive}.`,
     );
   }
-  if (storages.length === 1 && storages[0]) {
-    return storages[0];
-  }
+  const valueProperty = "name";
+  const search = true;
 
-  const choice: string = await Select.prompt({
+  return await chooseOne<StorageRow>({
+    choices,
     message,
-    search: true,
-    options: await toSelectOptions(
-      storages as unknown as Record<string, unknown>[],
-      "name",
-    ),
+    valueProperty,
+    search,
   });
-  const storage: StorageRow | undefined = storages.find(({ name }) =>
-    name === choice
-  );
-  if (!storage) {
-    throw new Error(
-      `Could not find "${choice}", which you chose as storage for ${descriptive}.`,
-    );
-  }
-  return storage;
 }
 
 export async function getStorages(
