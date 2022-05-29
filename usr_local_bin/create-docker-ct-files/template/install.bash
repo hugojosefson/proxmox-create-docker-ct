@@ -1,5 +1,5 @@
-#!/bin/sh
-set -e
+#!/usr/bin/env bash
+set -euo pipefail; IFS=$'\t\n'
 
 # Type any extra commands inside this function. They will run last.
 extra_commands() {

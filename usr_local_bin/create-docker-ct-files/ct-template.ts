@@ -88,9 +88,11 @@ export async function createCtTemplate(
   ]);
   await run(["pct", "start", vmid]);
   await run(
-    ["pct", "exec", vmid, "--", "/bin/sh"],
+    ["pct", "exec", vmid, "--", "/usr/bin/env", "bash"],
     {
-      stdin: await readFromUrl(new URL("template/install.sh", import.meta.url)),
+      stdin: await readFromUrl(
+        new URL("template/install.bash", import.meta.url),
+      ),
     },
   );
   await run(["pct", "shutdown", vmid]);
