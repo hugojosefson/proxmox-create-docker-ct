@@ -15,6 +15,22 @@ type CtTemplateOptions = {
   memoryMegabytes?: number;
 };
 
+async function getAppdataDir(
+  storage: Pick<StorageRow, "name">,
+  vmid: VMID,
+  options: Pick<CtTemplateOptions, "name">,
+) {
+  const pathSegments: string[] = (await run([
+    "pvesm",
+    "path",
+    `${storage.name}:${vmid}/vm-${vmid}-disk-0.raw`,
+  ])).split("/");
+  const [_disk, _vmid, _images, ...appDataRootSegments] = pathSegments
+    .reverse();
+  return [...appDataRootSegments.reverse(), "appdata", options.name]
+    .join("/");
+}
+
 export async function createCtTemplate(
   options: CtTemplateOptions,
 ): Promise<VMID> {
@@ -24,6 +40,9 @@ export async function createCtTemplate(
   );
   const vmid: VMID = options.vmid ??
     parseInt(await run("pvesh get /cluster/nextid"), 10);
+  const bridgeName = (await getNetworkInterface("bridge")).name;
+  const storageName = (await options.storage()).name;
+
   await run([
     "pct",
     "create",
@@ -44,9 +63,7 @@ export async function createCtTemplate(
     "--swap",
     options.memoryMegabytes ?? 2048,
     "--net0",
-    `name=eth0,bridge=${((await getNetworkInterface(
-      "bridge",
-    )).name)},firewall=1,ip=dhcp`,
+    `name=eth0,bridge=${bridgeName},firewall=1,ip=dhcp`,
     "--ostype",
     options.baseFilename.split("-")[0],
     "--ssh-public-keys",
@@ -56,9 +73,18 @@ export async function createCtTemplate(
     "--template",
     0,
     "--storage",
-    (await options.storage()).name,
+    storageName,
     "--unprivileged",
     1,
+  ]);
+  const appdataDir = await getAppdataDir({ name: storageName }, vmid, options);
+  await Deno.mkdir(appdataDir, { recursive: true });
+  await run([
+    "pct",
+    "set",
+    vmid,
+    "--mp0",
+    `${appdataDir},mp=/appdata,backup=1,mountoptions=noexec`,
   ]);
   await run(["pct", "start", vmid]);
   await run(
