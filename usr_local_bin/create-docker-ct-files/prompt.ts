@@ -51,10 +51,12 @@ async function toSelectOptions<T extends Record<string, unknown>>(
   const headerLineInput: string = Object.keys(items[0]).join(" ");
   const table: string = await run(
     "column --table",
-    [
-      headerLineInput,
-      ...items.map((item) => Object.values(item).join(" ")),
-    ].join("\n"),
+    {
+      stdin: [
+        headerLineInput,
+        ...items.map((item) => Object.values(item).join(" ")),
+      ].join("\n"),
+    },
   );
   const tableLines = table.split("\n");
   const tableWidth = Math.max(...tableLines.map((line) => line.length));

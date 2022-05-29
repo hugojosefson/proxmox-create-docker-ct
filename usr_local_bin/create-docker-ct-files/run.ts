@@ -1,9 +1,33 @@
 import { asString, isString, j } from "./fn.ts";
+import { weakEnvGet } from "./os.ts";
 import { parseColumns } from "./parse-columns.ts";
 
-async function tryRun(cmd: string[], stdin?: string): Promise<string> {
-  const pipeStdIn = isString(stdin);
+export type SimpleValue = string | number | boolean;
 
+export interface RunOptions {
+  stdin?: string;
+  verbose?: boolean;
+}
+
+const defaultRunOptions: RunOptions = {
+  verbose: !!await weakEnvGet("VERBOSE"),
+};
+
+async function tryRun(
+  cmd: string[],
+  options: RunOptions = defaultRunOptions,
+): Promise<string> {
+  options = { ...defaultRunOptions, ...options };
+
+  const pipeStdIn = isString(options.stdin);
+
+  if (options.verbose) {
+    console.error(`
+
+===============================================================================
+${j({ cmd, stdin: options.stdin })}
+-------------------------------------------------------------------------------`);
+  }
   const process = Deno.run({
     cmd,
     stdin: pipeStdIn ? "piped" : "null",
@@ -12,7 +36,7 @@ async function tryRun(cmd: string[], stdin?: string): Promise<string> {
   });
 
   if (pipeStdIn) {
-    const stdinBuf = new TextEncoder().encode(stdin);
+    const stdinBuf = new TextEncoder().encode(options.stdin);
     try {
       await process.stdin?.write(stdinBuf);
     } finally {
@@ -32,7 +56,11 @@ async function tryRun(cmd: string[], stdin?: string): Promise<string> {
   process.close();
 
   if (status.success) {
-    return asString(stdout);
+    const stdoutString = asString(stdout);
+    if (options.verbose) {
+      console.error(stdoutString);
+    }
+    return stdoutString;
   }
   const reason = {
     ...status,
@@ -42,14 +70,14 @@ async function tryRun(cmd: string[], stdin?: string): Promise<string> {
 }
 
 export async function run(
-  command: string | (string | number | boolean)[],
-  stdin?: string,
+  command: string | SimpleValue[],
+  options: RunOptions = defaultRunOptions,
 ): Promise<string> {
   const cmd: string[] = isString(command)
     ? command.split(" ")
     : command.map((segment) => `${segment}`);
   try {
-    return await tryRun(cmd, stdin);
+    return await tryRun(cmd, options);
   } catch (error) {
     console.error(j({ cmd, error }));
     throw error;
@@ -57,8 +85,8 @@ export async function run(
 }
 
 export async function columnRun<T>(
-  command: string | (string | number | boolean)[],
-  stdin?: string,
+  command: string | SimpleValue[],
+  options: RunOptions = defaultRunOptions,
 ): Promise<T[]> {
-  return parseColumns<T>(await run(command, stdin));
+  return parseColumns<T>(await run(command, options));
 }

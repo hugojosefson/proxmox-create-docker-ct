@@ -12,6 +12,6 @@ export function parseColumns<T>(input: string): T[] {
 async function withHeaders(input: string, headers: string[]): Promise<string> {
   return await run(
     ["column", "--table", "--table-columns", ...headers.join(",")],
-    input,
+    { stdin: input },
   );
 }
