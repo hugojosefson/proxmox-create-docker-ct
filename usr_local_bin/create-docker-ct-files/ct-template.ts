@@ -79,6 +79,11 @@ export async function createCtTemplate(
   ]);
   const appdataDir = await getAppdataDir({ name: storageName }, vmid, options);
   await Deno.mkdir(appdataDir, { recursive: true });
+  await Deno.writeTextFile(
+    appdataDir + "/docker-compose.yml",
+    await readFromUrl(new URL("template/docker-compose.yml", import.meta.url)),
+  );
+  await run(["chown", "-R", `${100_000}:${100_000}`, appdataDir]);
   await run([
     "pct",
     "set",

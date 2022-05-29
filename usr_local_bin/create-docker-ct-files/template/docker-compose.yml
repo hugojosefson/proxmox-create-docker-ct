@@ -7,4 +7,4 @@ services:
       - PORT="80"
     ports: [ "80:80" ]
     # volumes:
-    #   - ./data:/data:ro
+    #   - /appdata/data:/data:ro
