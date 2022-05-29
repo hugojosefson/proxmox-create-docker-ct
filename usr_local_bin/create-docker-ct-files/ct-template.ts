@@ -29,7 +29,10 @@ export async function ensureExistsCtTemplate(
 
 export async function ensureExistsTemplate(filename: string): Promise<void> {
   await run("pveam update");
-  const templateStorage: StorageRow = await getStorage(CONTENT_CT_TEMPLATE);
+  const templateStorage: StorageRow = await getStorage(
+    CONTENT_CT_TEMPLATE,
+    `CT template ${filename}`,
+  );
   const downloadResult = await run([
     "pveam",
     "download",

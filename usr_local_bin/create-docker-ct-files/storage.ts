@@ -1,6 +1,6 @@
 import { columnRun } from "./run.ts";
 import { Select } from "./deps.ts";
-import { j } from "./fn.ts";
+import { j, toSelectOptions } from "./fn.ts";
 
 export type StorageType =
   | "zfspool"
@@ -57,6 +57,7 @@ export const CONTENT_SNIPPET = "snippets" as const;
 export async function getStorage(
   content: ContentType,
   descriptive = `"${content}" content`,
+  message = `Pick a storage for ${descriptive}.`,
 ): Promise<StorageRow> {
   const storages: StorageRow[] = await getStorages(content);
   if (storages.length === 0) {
@@ -69,11 +70,11 @@ export async function getStorage(
   }
 
   const choice: string = await Select.prompt({
-    message: `Pick a storage for ${descriptive}`,
-    options: storages.map((storage) => ({
-      name: j(storage, 0),
-      value: storage.name,
-    })),
+    message,
+    options: await toSelectOptions(
+      storages as unknown as Record<string, unknown>[],
+      "name",
+    ),
   });
   const storage: StorageRow | undefined = storages.find(({ name }) =>
     name === choice
