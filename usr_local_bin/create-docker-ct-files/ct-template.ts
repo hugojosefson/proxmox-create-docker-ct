@@ -4,17 +4,6 @@ import { CONTENT_CT_TEMPLATE, StorageRow } from "./storage.ts";
 import { readFromUrl } from "./read-from-url.ts";
 import { getNetworkInterface } from "./network.ts";
 
-type CtTemplateOptions = {
-  baseTemplateStorage: () => Promise<StorageRow>;
-  baseFilename: string;
-  storage: () => Promise<StorageRow>;
-  name: string;
-  filename: string;
-  vmid?: VMID;
-  cores?: number;
-  memoryMegabytes?: number;
-};
-
 async function getAppdataDir(
   storage: Pick<StorageRow, "name">,
   vmid: VMID,
@@ -30,6 +19,17 @@ async function getAppdataDir(
   return [...appDataRootSegments.reverse(), "appdata", options.name]
     .join("/");
 }
+
+type CtTemplateOptions = {
+  baseTemplateStorage: () => Promise<StorageRow>;
+  baseFilename: string;
+  storage: () => Promise<StorageRow>;
+  name: string;
+  filename: string;
+  vmid?: VMID;
+  cores?: number;
+  memoryMegabytes?: number;
+};
 
 export async function createCtTemplate(
   options: CtTemplateOptions,
@@ -77,6 +77,53 @@ export async function createCtTemplate(
     "--unprivileged",
     1,
   ]);
+  await run(["pct", "start", vmid]);
+  await run(
+    ["pct", "exec", vmid, "--", "/usr/bin/env", "bash"],
+    {
+      stdin: await readFromUrl(
+        new URL("template/install.bash", import.meta.url),
+      ),
+    },
+  );
+  await run(["pct", "shutdown", vmid]);
+  await run(["pct", "template", vmid]);
+  return vmid;
+}
+
+type CtOptions = {
+  templateVmid: VMID;
+  vmid?: VMID;
+  name: string;
+  storage: () => Promise<StorageRow>;
+};
+
+export async function createCt(
+  options: CtOptions,
+): Promise<VMID> {
+  const vmid: VMID = options.vmid ??
+    parseInt(await run("pvesh get /cluster/nextid"), 10);
+
+  const cloneCmd = [
+    "pct",
+    "clone",
+    options.templateVmid,
+    vmid,
+    "--hostname",
+    options.name,
+    "--description",
+    (await readFromUrl(new URL("template/summary.md", import.meta.url)))
+      .replaceAll("${APP_NAME}", options.name)
+      .replaceAll("${DOCKER_CT_TEMPLATE_FILENAME}", `${options.templateVmid}`),
+  ];
+  await run(cloneCmd).catch(() =>
+    run([
+      ...cloneCmd,
+      "--full",
+      1,
+    ])
+  );
+  const storageName = (await options.storage()).name;
   const appdataDir = await getAppdataDir({ name: storageName }, vmid, options);
   await Deno.mkdir(appdataDir, { recursive: true });
   await Deno.writeTextFile(
@@ -91,17 +138,6 @@ export async function createCtTemplate(
     "--mp0",
     `${appdataDir},mp=/appdata,backup=1,mountoptions=noexec`,
   ]);
-  await run(["pct", "start", vmid]);
-  await run(
-    ["pct", "exec", vmid, "--", "/usr/bin/env", "bash"],
-    {
-      stdin: await readFromUrl(
-        new URL("template/install.bash", import.meta.url),
-      ),
-    },
-  );
-  await run(["pct", "shutdown", vmid]);
-  await run(["pct", "template", vmid]);
   return vmid;
 }
 

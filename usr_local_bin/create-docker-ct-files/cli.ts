@@ -9,14 +9,34 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { ensureExistsCtTemplate } from "./ct-template.ts";
-import { CONTENT_CT_TEMPLATE, getStorage } from "./storage.ts";
+import { createCt, ensureExistsCtTemplate } from "./ct-template.ts";
+import {
+  CONTENT_CT_TEMPLATE,
+  CONTENT_VM_IMAGE,
+  getStorage,
+} from "./storage.ts";
+import { VMID } from "./os.ts";
+
+const [name] = Deno.args;
+
+function usageAndExit(code = 2): never {
+  console.error(`USAGE:
+
+  create-docker-ct <name>     Create a CT
+  create-docker-ct --help     This help message
+`);
+  Deno.exit(code);
+}
+
+if (!name || name === "--help") {
+  usageAndExit();
+}
 
 const CT_BASE_TEMPLATE_FILENAME = "ubuntu-22.04-standard_22.04-1_amd64.tar.zst";
 const DOCKER_CT_TEMPLATE_NAME = "docker-ct-ubuntu-2204";
 const DOCKER_CT_TEMPLATE_FILENAME = `docker-ct-${CT_BASE_TEMPLATE_FILENAME}`;
 
-const templateId: number = await ensureExistsCtTemplate({
+const templateVmid: VMID = await ensureExistsCtTemplate({
   baseTemplateStorage: () =>
     getStorage(
       CONTENT_CT_TEMPLATE,
@@ -32,6 +52,16 @@ const templateId: number = await ensureExistsCtTemplate({
   filename: DOCKER_CT_TEMPLATE_FILENAME,
 });
 
-console.log(`CT template: ${templateId}`);
+const vmid: VMID = await createCt({
+  templateVmid,
+  name,
+  storage: () =>
+    getStorage(
+      CONTENT_VM_IMAGE,
+      `appdata for CT ${name}`,
+    ),
+});
+
+console.log(vmid);
 
 //🔚

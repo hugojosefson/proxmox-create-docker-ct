@@ -56,7 +56,7 @@ export const CONTENT_SNIPPET = "snippets" as const;
 export async function getStorage(
   content: ContentType,
   descriptive = `"${content}" content`,
-  message = `Pick a storage for ${descriptive}.`,
+  message = `Pick storage for ${descriptive}.`,
 ): Promise<StorageRow> {
   const choices: StorageRow[] = await getStorages(content);
   if (choices.length === 0) {
