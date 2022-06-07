@@ -7,6 +7,11 @@ extra_commands() {
   byobu-enable
 }
 
+cat >> /etc/issue <<<'
+\4
+\6
+'
+
 apt-get update
 apt-get full-upgrade --purge -y
 apt-get auto-remove -y
