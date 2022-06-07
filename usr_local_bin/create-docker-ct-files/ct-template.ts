@@ -136,7 +136,7 @@ export async function createCt(
     "set",
     vmid,
     "--mp0",
-    `${appdataDir},mp=/appdata,backup=1,mountoptions=noexec`,
+    `${appdataDir},mp=/appdata,backup=1`,
   ]);
   return vmid;
 }
