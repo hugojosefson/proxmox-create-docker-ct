@@ -7,4 +7,4 @@ services:
       - PORT="80"
     ports: [ "80:80" ]
     # volumes:
-    #   - /appdata/data:/data:ro
+    #   - /appdata/data:/data:ro    # left side is inside lxc, right is inside docker
