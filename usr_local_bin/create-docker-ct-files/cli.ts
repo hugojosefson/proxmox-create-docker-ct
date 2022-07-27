@@ -35,7 +35,8 @@ function usageAndExit(code = 2): never {
   console.error(`USAGE:
 
   create-docker-ct --help                              This help message
-  create-docker-ct <name> [<base_template_filename>]   Create a CT
+  create-docker-ct <name>                              Create a CT from ${defaultTemplate}
+  create-docker-ct <name> [<base_template_filename>]   Create a CT from specified base template
 
 EXAMPLE:
 

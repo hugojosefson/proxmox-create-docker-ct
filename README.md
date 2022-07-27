@@ -37,20 +37,37 @@ curl -sSfL https://github.com/hugojosefson/proxmox-create-docker-ct/tarball/main
 
 ## Create an app CT
 
+```
+USAGE:
+
+  create-docker-ct --help                              This help message
+  create-docker-ct <name>                              Create a CT from ubuntu-22.04-standard_22.04-1_amd64.tar.zst
+  create-docker-ct <name> [<base_template_filename>]   Create a CT from specified base template
+
+EXAMPLE:
+
+  create-docker-ct my-service
+  create-docker-ct my-service ubuntu-22.04-standard_22.04-1_amd64.tar.zst
+  create-docker-ct my-service alpine-3.16-default_20220622_amd64.tar.xz
+  create-docker-ct my-service alpine-3.15-default_20211202_amd64.tar.xz
+```
+
 Run this script:
 
 ```sh
-create-docker-ct <name_of_app>
+create-docker-ct <name>
 ```
 
-...where `<name_of_app>` is the name of the app.
+...where `<name>` is the name of the app.
 
 The application's name will be its directory name, and its hostname.
 
 The script will output:
 
 - the app CT's VMID number, and
-- a file path to that specific CT's `docker-compose.yml` file.
+- _TODO: output a file path to that specific CT's `docker-compose.yml` file.
+  (hint: it's in an `appdata/<name>` folder, in the storage you chose when
+  prompted by the script)_
 
 ## Deploy/redeploy application inside
 
