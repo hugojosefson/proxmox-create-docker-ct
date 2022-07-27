@@ -114,7 +114,7 @@ type CtOptions = {
 
 export async function createCt(
   options: CtOptions,
-): Promise<VMID> {
+): Promise<{ vmid: VMID; appdataDir: string }> {
   const vmid: VMID = options.vmid ??
     parseInt(await run("pvesh get /cluster/nextid"), 10);
 
@@ -152,7 +152,7 @@ export async function createCt(
     "--mp0",
     `${appdataDir},mp=/appdata,backup=1`,
   ]);
-  return vmid;
+  return { vmid, appdataDir };
 }
 
 export async function ensureExistsCtTemplate(

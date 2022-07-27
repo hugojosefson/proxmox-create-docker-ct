@@ -65,9 +65,8 @@ The application's name will be its directory name, and its hostname.
 The script will output:
 
 - the app CT's VMID number, and
-- _TODO: output a file path to that specific CT's `docker-compose.yml` file.
-  (hint: it's in an `appdata/<name>` folder, in the storage you chose when
-  prompted by the script)_
+- the directory mounted as `/appdata` inside the CT, where its
+  `docker-compose.yml` etc. lives.
 
 ## Deploy/redeploy application inside
 

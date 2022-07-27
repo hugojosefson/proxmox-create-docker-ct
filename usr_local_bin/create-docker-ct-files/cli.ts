@@ -74,7 +74,7 @@ const templateVmid: VMID = await ensureExistsCtTemplate({
   filename: DOCKER_CT_TEMPLATE_FILENAME,
 });
 
-const vmid: VMID = await createCt({
+const { vmid, appdataDir } = await createCt({
   templateVmid,
   name,
   storage: () =>
@@ -85,3 +85,4 @@ const vmid: VMID = await createCt({
 });
 
 console.log(vmid);
+console.log(appdataDir);
