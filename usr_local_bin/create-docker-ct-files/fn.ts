@@ -21,3 +21,12 @@ export function parseJsonSafe(input: string | unknown): string | unknown {
   }
   return input;
 }
+
+/**
+ * Extract the command to run a script, from its shebang line.
+ * @param scriptContents the script source code
+ * @returns array of command and parameters
+ */
+export function extractShebangCommand(scriptContents: string): string[] {
+  return scriptContents.split("\n")[0].replace(/^#!/, "").split(" ");
+}

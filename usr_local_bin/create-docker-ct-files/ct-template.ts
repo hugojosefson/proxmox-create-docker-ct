@@ -3,6 +3,16 @@ import { run } from "./run.ts";
 import { CONTENT_CT_TEMPLATE, StorageRow } from "./storage.ts";
 import { readFromUrl } from "./read-from-url.ts";
 import { getNetworkInterface } from "./network.ts";
+import { extractShebangCommand } from "./fn.ts";
+
+/**
+ * Extracts a short alphanumeric (plus dash) name from a ct base template filename, for example "ubuntu-2204", or "alpine-316".
+ * @param filename
+ */
+export function getShortName(filename: string): string {
+  return filename.split("-").slice(0, 2).join("-")
+    .replaceAll(/[^a-z0-9-]/g, "");
+}
 
 async function getAppdataDir(
   storage: Pick<StorageRow, "name">,
@@ -42,6 +52,12 @@ export async function createCtTemplate(
     parseInt(await run("pvesh get /cluster/nextid"), 10);
   const bridgeName = (await getNetworkInterface("bridge")).name;
   const storageName = (await options.storage()).name;
+  const installScript = await readFromUrl(
+    new URL(
+      `template/${getShortName(options.baseFilename)}-install`,
+      import.meta.url,
+    ),
+  );
 
   await run([
     "pct",
@@ -79,11 +95,9 @@ export async function createCtTemplate(
   ]);
   await run(["pct", "start", vmid]);
   await run(
-    ["pct", "exec", vmid, "--", "/usr/bin/env", "bash"],
+    ["pct", "exec", vmid, "--", ...extractShebangCommand(installScript)],
     {
-      stdin: await readFromUrl(
-        new URL("template/install.bash", import.meta.url),
-      ),
+      stdin: installScript,
     },
   );
   await run(["pct", "shutdown", vmid]);

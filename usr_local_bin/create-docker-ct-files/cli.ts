@@ -1,5 +1,5 @@
 #!/bin/sh
-// 2>/dev/null;DENO_VERSION_RANGE="^1.22.1";DENO_RUN_ARGS="-A --unstable";set -e;V="$DENO_VERSION_RANGE";A="$DENO_RUN_ARGS";U="$(expr "$(echo "$V"|curl -Gso/dev/null -w%{url_effective} --data-urlencode @- "")" : '..\(.*\)...')";D="$(command -v deno||true)";t(){ d="$(mktemp)";rm "${d}";dirname "${d}";};f(){ m="$(command -v "$0"||true)";l="/* 2>/dev/null";! [ -z $m ]&&[ -r $m ]&&[ "$(head -c3 "$m")" = '#!/' ]&&(read x && read y &&[ "$x" = "#!/bin/sh" ]&&[ "$l" != "${y%"$l"*}" ])<"$m";};a(){ [ -n $D ];};s(){ a&&[ -x "$R/deno" ]&&[ "$R/deno" = "$D" ]&&return;deno eval "import{satisfies as e}from'https://deno.land/x/semver@v1.4.0/mod.ts';Deno.exit(e(Deno.version.deno,'$V')?0:1);">/dev/null 2>&1;};g(){ curl -sSfL "https://api.mattandre.ws/semver/github/denoland/deno/$U";};e(){ R="$(t)/deno-range-$V/bin";mkdir -p "$R";export PATH="$R:$PATH";[ -x "$R/deno" ]&&return;a&&s&&([ -L "$R/deno" ]||ln -s "$D" "$R/deno")&&return;v="$(g)";i="$(t)/deno-$v";[ -L "$R/deno" ]||ln -s "$i/bin/deno" "$R/deno";s && return;command -v unzip>/dev/null||apt-get install -qqy unzip;curl -fsSL https://deno.land/install.sh|DENO_INSTALL="$i" sh -s "$v">&2;};e;f&&exec deno run $A "$(readlink -f "$0")" "$@";exec deno run $A - "$@"<<'//🔚'
+// 2>/dev/null;DENO_VERSION_RANGE="^1.24";DENO_RUN_ARGS="-qA --unstable";set -e;V="$DENO_VERSION_RANGE";A="$DENO_RUN_ARGS";U="$(expr "$(echo "$V"|curl -Gso/dev/null -w%{url_effective} --data-urlencode @- "")" : '..\(.*\)...')";D="$(command -v deno||true)";t(){ d="$(mktemp)";rm "${d}";dirname "${d}";};a(){ [ -n $D ];};s(){ a&&[ -x "$R/deno" ]&&[ "$R/deno" = "$D" ]&&return;deno eval "import{satisfies as e}from'https://deno.land/x/semver@v1.4.0/mod.ts';Deno.exit(e(Deno.version.deno,'$V')?0:1);">/dev/null 2>&1;};g(){ curl -sSfL "https://semver-version.deno.dev/api/github/denoland/deno/$U";};e(){ R="$(t)/deno-range-$V/bin";mkdir -p "$R";export PATH="$R:$PATH";[ -x "$R/deno" ]&&return;a&&s&&([ -L "$R/deno" ]||ln -s "$D" "$R/deno")&&return;v="$(g)";i="$(t)/deno-$v";[ -L "$R/deno" ]||ln -s "$i/bin/deno" "$R/deno";s && return;([ "${A#*-q}" != "$A" ]&&exec 2>/dev/null;curl -fsSL https://deno.land/install.sh|DENO_INSTALL="$i" sh -s $DENO_INSTALL_ARGS "$v">&2);};e;exec "$R/deno" run $A "$(readlink -f "$0")" "$@"
 /**
  * via https://github.com/hugojosefson/proxmox-create-docker-ct
  * License: MIT
@@ -9,7 +9,11 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { createCt, ensureExistsCtTemplate } from "./ct-template.ts";
+import {
+  createCt,
+  ensureExistsCtTemplate,
+  getShortName,
+} from "./ct-template.ts";
 import {
   CONTENT_CT_TEMPLATE,
   CONTENT_VM_IMAGE,
@@ -17,13 +21,30 @@ import {
 } from "./storage.ts";
 import { VMID } from "./os.ts";
 
-const [name] = Deno.args;
+/** template filenames we support. the first one is default if user does not specify. */
+const compatibleTemplates = [
+  "ubuntu-22.04-standard_22.04-1_amd64.tar.zst",
+  "alpine-3.16-default_20220622_amd64.tar.xz",
+  "alpine-3.15-default_20211202_amd64.tar.xz",
+];
+
+const defaultTemplate = compatibleTemplates[0];
+const [name, CT_BASE_TEMPLATE_FILENAME = defaultTemplate] = Deno.args;
 
 function usageAndExit(code = 2): never {
   console.error(`USAGE:
 
-  create-docker-ct <name>     Create a CT
-  create-docker-ct --help     This help message
+  create-docker-ct --help                              This help message
+  create-docker-ct <name> [<base_template_filename>]   Create a CT
+
+EXAMPLE:
+
+  create-docker-ct my-service
+  ${
+    compatibleTemplates.map((filename) =>
+      `create-docker-ct my-service ${filename}`
+    ).join("\n  ")
+  }
 `);
   Deno.exit(code);
 }
@@ -32,8 +53,8 @@ if (!name || name === "--help") {
   usageAndExit();
 }
 
-const CT_BASE_TEMPLATE_FILENAME = "ubuntu-22.04-standard_22.04-1_amd64.tar.zst";
-const DOCKER_CT_TEMPLATE_NAME = "docker-ct-ubuntu-2204";
+const DOCKER_CT_TEMPLATE_NAME = "docker-ct-" +
+  getShortName(CT_BASE_TEMPLATE_FILENAME);
 const DOCKER_CT_TEMPLATE_FILENAME = `docker-ct-${CT_BASE_TEMPLATE_FILENAME}`;
 
 const templateVmid: VMID = await ensureExistsCtTemplate({
@@ -63,5 +84,3 @@ const vmid: VMID = await createCt({
 });
 
 console.log(vmid);
-
-//🔚
