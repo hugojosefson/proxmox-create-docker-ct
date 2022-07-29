@@ -15,6 +15,7 @@ import {
   getShortName,
 } from "./ct-template.ts";
 import {
+  CONTENT_CT_ROOTDIR,
   CONTENT_CT_TEMPLATE,
   CONTENT_VM_IMAGE,
   getStorage,
@@ -67,7 +68,7 @@ const templateVmid: VMID = await ensureExistsCtTemplate({
   baseFilename: CT_BASE_TEMPLATE_FILENAME,
   storage: () =>
     getStorage(
-      CONTENT_CT_TEMPLATE,
+      CONTENT_CT_ROOTDIR,
       DOCKER_CT_TEMPLATE_FILENAME,
     ),
   name: DOCKER_CT_TEMPLATE_NAME,
