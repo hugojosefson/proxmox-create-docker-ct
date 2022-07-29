@@ -17,7 +17,6 @@ import {
 import {
   CONTENT_CT_ROOTDIR,
   CONTENT_CT_TEMPLATE,
-  CONTENT_VM_IMAGE,
   getStorage,
 } from "./storage.ts";
 import { VMID } from "./os.ts";
@@ -80,7 +79,7 @@ const { vmid, appdataDir } = await createCt({
   name,
   storage: () =>
     getStorage(
-      CONTENT_VM_IMAGE,
+      undefined,
       `appdata for CT ${name}`,
     ),
 });

@@ -54,7 +54,7 @@ export const CONTENT_ISO = "iso" as const;
 export const CONTENT_SNIPPET = "snippets" as const;
 
 export async function getStorage(
-  content: ContentType,
+  content: ContentType | undefined,
   descriptive = `"${content}" content`,
   message = `Pick storage for ${descriptive}.`,
 ): Promise<StorageRow> {

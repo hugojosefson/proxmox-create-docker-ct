@@ -3,7 +3,7 @@ import { run } from "./run.ts";
 import { CONTENT_CT_TEMPLATE, StorageRow } from "./storage.ts";
 import { readFromUrl } from "./read-from-url.ts";
 import { getNetworkInterface } from "./network.ts";
-import { extractShebangCommand } from "./fn.ts";
+import { extractShebangCommand, extractValueFromPveShGet } from "./fn.ts";
 
 /**
  * Extracts a short alphanumeric (plus dash) name from a ct base template filename, for example "ubuntu-2204", or "alpine-316".
@@ -16,18 +16,21 @@ export function getShortName(filename: string): string {
 
 async function getAppdataDir(
   storage: Pick<StorageRow, "name">,
-  vmid: VMID,
   options: Pick<CtTemplateOptions, "name">,
 ) {
-  const pathSegments: string[] = (await run([
-    "pvesm",
+  const path = extractValueFromPveShGet(
     "path",
-    `${storage.name}:${vmid}/vm-${vmid}-disk-0.raw`,
-  ])).split("/");
-  const [_disk, _vmid, _images, ...appDataRootSegments] = pathSegments
-    .reverse();
-  return [...appDataRootSegments.reverse(), "appdata", options.name]
-    .join("/");
+    await run([
+      "pvesh",
+      "get",
+      `/storage/${storage.name}`,
+    ]),
+  );
+
+  if (!path) {
+    throw new Error(`Could not find path for storage ${storage.name}.`);
+  }
+  return `${path}/appdata/${options.name}`;
 }
 
 type CtTemplateOptions = {
@@ -138,7 +141,7 @@ export async function createCt(
     ])
   );
   const storageName = (await options.storage()).name;
-  const appdataDir = await getAppdataDir({ name: storageName }, vmid, options);
+  const appdataDir = await getAppdataDir({ name: storageName }, options);
   await Deno.mkdir(appdataDir, { recursive: true });
   await Deno.writeTextFile(
     appdataDir + "/docker-compose.yml",
