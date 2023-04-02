@@ -21,6 +21,7 @@ import { VMID } from "./os.ts";
 
 /** template filenames we support. the first one is default if user does not specify. */
 const compatibleTemplates = [
+  "alpine-3.17-default_20221129_amd64.tar.xz",
   "alpine-3.16-default_20220622_amd64.tar.xz",
   "alpine-3.15-default_20211202_amd64.tar.xz",
   "ubuntu-22.04-standard_22.04-1_amd64.tar.zst",
@@ -31,13 +32,13 @@ const [name, CT_BASE_TEMPLATE_FILENAME = defaultTemplate] = Deno.args;
 
 function usageAndExit(code = 2): never {
   console.error(`USAGE:
-  
+
   create-docker-ct --help                              This help message
   create-docker-ct <name>                              Create a CT from ${defaultTemplate}
   create-docker-ct <name> [<base_template_filename>]   Create a CT from specified base template
-  
+
 EXAMPLE:
-  
+
   create-docker-ct my-service
   ${
     compatibleTemplates.map((filename) =>
