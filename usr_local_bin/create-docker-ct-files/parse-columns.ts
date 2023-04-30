@@ -9,7 +9,7 @@ export function parseColumns<T>(input: string): T[] {
     .map((row) => mapValues(row, parseJsonSafe) as T);
 }
 
-async function withHeaders(input: string, headers: string[]): Promise<string> {
+async function _withHeaders(input: string, headers: string[]): Promise<string> {
   return await run(
     ["column", "--table", "--table-columns", ...headers.join(",")],
     { stdin: input },

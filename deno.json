@@ -1,9 +1,7 @@
 {
   "fmt": {
-    "files": {
-      "exclude": [
-        ".isolate-in-docker"
-      ]
-    }
+    "exclude": [
+      ".isolate-in-docker"
+    ]
   }
 }
