@@ -1,5 +1,10 @@
-import { parseJsonSafe } from "./fn.ts";
-import { _parseColumns, camelCase, mapKeys, mapValues } from "./deps.ts";
+import {
+  _parseColumns,
+  camelCase,
+  mapKeys,
+  mapValues,
+  parseJsonSafe,
+} from "./deps.ts";
 
 export function parseColumns<T>(input: string): T[] {
   const rows: T[] = _parseColumns(input) as T[];

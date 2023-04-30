@@ -103,7 +103,15 @@
     "https://deno.land/x/media_types@v2.8.4/db.ts": "22db9bd6eb24934105098e9fce27d2746ef3861cd2668edef749c83c60acd60b",
     "https://deno.land/x/media_types@v2.8.4/deps.ts": "2dd71d14adbe5f3c837bd79e010d9706895a2cebdcd50d13ab1debe42b32ff7f",
     "https://deno.land/x/media_types@v2.8.4/mod.ts": "d63583b978d32eff8b76e1ae5d83cba2fb27baa90cc1bcb0ad15a06122ea8c19",
-    "https://deno.land/x/semver@v1.4.1/mod.ts": "0b79c87562eb8a1f008ab0d98f8bb60076dd65bc06f1f8fdfac2d2dab162c27b"
+    "https://deno.land/x/run_simple@2.0.0/mod.ts": "107de176c82574d128164e31ad7811a03ef85d67919061eed3b8f3bcecec1885",
+    "https://deno.land/x/run_simple@2.0.0/src/fn.ts": "f5d1185c1f26df4973b77b29aa59465c9c076a9cc9e9538d50e4bc7e575d8074",
+    "https://deno.land/x/run_simple@2.0.0/src/os.ts": "47820a9a43f99006ef8e6a0c4c353406cda1155e18b6ced50d0863c2a11863e9",
+    "https://deno.land/x/run_simple@2.0.0/src/run.ts": "df0a8865aeaa7028aa6b28276556c782939ed1c432a161f1da86f24b70b9a05a",
+    "https://deno.land/x/semver@v1.4.1/mod.ts": "0b79c87562eb8a1f008ab0d98f8bb60076dd65bc06f1f8fdfac2d2dab162c27b",
+    "https://raw.githubusercontent.com/hugojosefson/deno-run-simple/command-api/mod.ts": "107de176c82574d128164e31ad7811a03ef85d67919061eed3b8f3bcecec1885",
+    "https://raw.githubusercontent.com/hugojosefson/deno-run-simple/command-api/src/fn.ts": "f5d1185c1f26df4973b77b29aa59465c9c076a9cc9e9538d50e4bc7e575d8074",
+    "https://raw.githubusercontent.com/hugojosefson/deno-run-simple/command-api/src/os.ts": "47820a9a43f99006ef8e6a0c4c353406cda1155e18b6ced50d0863c2a11863e9",
+    "https://raw.githubusercontent.com/hugojosefson/deno-run-simple/command-api/src/run.ts": "df0a8865aeaa7028aa6b28276556c782939ed1c432a161f1da86f24b70b9a05a"
   },
   "npm": {
     "specifiers": {

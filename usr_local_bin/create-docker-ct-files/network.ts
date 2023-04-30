@@ -1,4 +1,4 @@
-import { jsonRun } from "./run.ts";
+import { jsonRun } from "./deps.ts";
 import { chooseOne } from "./prompt.ts";
 
 export type NetworkInterfaceType =

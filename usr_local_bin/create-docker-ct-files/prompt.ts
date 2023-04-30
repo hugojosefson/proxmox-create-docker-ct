@@ -1,5 +1,4 @@
-import { Select } from "./deps.ts";
-import { run } from "./run.ts";
+import { run, Select } from "./deps.ts";
 
 export interface ChooseOneOptions<T> {
   choices: T[];

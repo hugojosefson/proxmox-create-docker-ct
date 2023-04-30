@@ -1,5 +1,5 @@
 import { getCtTemplate, PctEntry, VMID } from "./os.ts";
-import { run } from "./run.ts";
+import { run } from "./deps.ts";
 import { CONTENT_CT_TEMPLATE, StorageRow } from "./storage.ts";
 import { readFromUrl } from "./read-from-url.ts";
 import { getNetworkInterface } from "./network.ts";
