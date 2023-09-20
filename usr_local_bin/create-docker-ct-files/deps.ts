@@ -1,3 +1,4 @@
+export { dirname } from "https://deno.land/std@0.202.0/path/dirname.ts";
 export { mapKeys } from "https://deno.land/std@0.202.0/collections/map_keys.ts";
 export { mapValues } from "https://deno.land/std@0.202.0/collections/map_values.ts";
 

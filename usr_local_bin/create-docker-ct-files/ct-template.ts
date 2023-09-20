@@ -1,5 +1,5 @@
 import { getCtTemplate, PctEntry, VMID } from "./os.ts";
-import { run } from "./deps.ts";
+import { dirname, run } from "./deps.ts";
 import { CONTENT_CT_TEMPLATE, StorageRow } from "./storage.ts";
 import { readFromUrl } from "./read-from-url.ts";
 import { getNetworkInterface } from "./network.ts";
@@ -44,6 +44,25 @@ type CtTemplateOptions = {
   memoryMegabytes?: number;
 };
 
+async function readInstallScript(baseFilename: string): Promise<string> {
+  const url = new URL(
+    `template/${getShortName(baseFilename)}-install`,
+    import.meta.url,
+  );
+  try {
+    return await readFromUrl(url);
+  } catch (e) {
+    if (e instanceof Deno.errors.NotFound) {
+      throw new Error(
+        `Could not find install script for ${baseFilename}.
+It should be at ${url}.
+Only install scripts in ${dirname(url.toString())}/ are supported.`,
+      );
+    }
+    throw e;
+  }
+}
+
 export async function createCtTemplate(
   options: CtTemplateOptions,
 ): Promise<VMID> {
@@ -55,12 +74,7 @@ export async function createCtTemplate(
     parseInt(await run("pvesh get /cluster/nextid"), 10);
   const bridgeName = (await getNetworkInterface("bridge")).name;
   const storageName = (await options.storage()).name;
-  const installScript = await readFromUrl(
-    new URL(
-      `template/${getShortName(options.baseFilename)}-install`,
-      import.meta.url,
-    ),
-  );
+  const installScript = await readInstallScript(options.baseFilename);
 
   await run([
     "pct",
