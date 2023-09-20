@@ -1,4 +1,4 @@
-import { run, Select } from "./deps.ts";
+import { run, Select, SelectOptions } from "./deps.ts";
 
 export interface ChooseOneOptions<T> {
   choices: T[];
@@ -43,7 +43,7 @@ export async function chooseOne<T>(
 async function toSelectOptions<T extends Record<string, unknown>>(
   items: T[],
   valueProperty: string,
-): Promise<{ name?: string; value: string; disabled?: boolean }[]> {
+): Promise<SelectOptions<string>["options"]> {
   if (items.length === 0) {
     return [];
   }

@@ -1,5 +1,16 @@
 {
+  "tasks": {
+    "all": "deno fmt && deno lint && deno task check",
+    "all-reload": "deno fmt && deno lint && deno task check --reload && deno task test --reload",
+    "check": "sh -c '$(command -v fd || command -v fdfind) '\"'\"'\\.(mj|j|t)sx?$'\"'\"' --hidden --threads=1 --exec deno check {}'",
+    "udd": "sh -c 'deno run --allow-read=. --allow-write=. --allow-net --allow-run=deno https://deno.land/x/udd@0.8.2/main.ts --test \"deno task all\" $($(command -v fd || command -v fdfind) '\"'\"'(\\.(mj|j|t)sx?|^deno.jsonc?|^create-docker-ct)$'\"'\"')'"
+  },
   "fmt": {
+    "exclude": [
+      ".isolate-in-docker"
+    ]
+  },
+  "lint": {
     "exclude": [
       ".isolate-in-docker"
     ]
