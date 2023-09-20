@@ -3,7 +3,7 @@ set -euo pipefail; IFS=$'\t\n'
 
 # Type any extra commands inside this function. They will run last.
 extra_commands() {
-  apt-get install -y byobu vim
+  apt-get install -y byobu neovim
   byobu-enable
 }
 
