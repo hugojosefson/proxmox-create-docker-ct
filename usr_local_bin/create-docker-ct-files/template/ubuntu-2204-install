@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail; IFS=$'\t\n'
+export DEBIAN_FRONTEND=noninteractive
 
 # Type any extra commands inside this function. They will run last.
 extra_commands() {
