@@ -1,0 +1,114 @@
+#!/bin/sh
+set -xe
+
+# Type any extra commands inside this function. They will run last.
+extra_commands() {
+  apk --no-cache add byobu neovim
+  byobu-enable
+  ln -sf "$(command -v nvim)" /usr/local/bin/vim
+}
+
+create_executable() {
+	filename="$1"
+	mkdir -p "$(dirname "${filename}")"
+	cat > "${filename}"
+	chmod +x "${filename}"
+}
+
+enable_service() {
+	name="$1"
+	rc-update add "${name}" boot
+}
+
+create_service() {
+	name="$1"
+	create_executable "/etc/init.d/${name}"
+	enable_service "${name}"
+}
+
+create_executable "/etc/local.d/update-issue.start" <<'EOF'
+#!/bin/sh
+set -e
+hr(){
+  echo "----------------------------------------------------------------------"
+}
+sed "/-----/,100d" -i /etc/issue || true
+sed "/Link encap/,100d" -i /etc/issue || true
+hr >> /etc/issue
+/sbin/ifconfig | grep -vE '^lo ' | grep -EA2 '^[^ ]' >> /etc/issue
+hr >> /etc/issue
+EOF
+
+apk upgrade --no-cache
+apk add --no-cache curl docker openssh-server
+
+DOCKER_COMPOSE_VERSION="$(curl -sSfL https://semver-version.deno.dev/api/github/docker/compose)"
+curl -sSfL -o /usr/local/bin/docker-compose "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-linux-x86_64"
+chmod +x /usr/local/bin/docker-compose
+
+mkdir -p /appdata
+
+enable_service local
+enable_service sshd
+
+create_service cgroups-patch <<'EOF'
+#!/sbin/openrc-run
+
+description="Mount the control groups for Docker"
+# via https://wildwolf.name/how-to-run-docker-in-alpine-container-in-lxc-lxd/
+
+depend()
+{
+    keyword -docker
+    need sysfs cgroups
+}
+
+start()
+{
+    if [ -d /sys/fs/cgroup ]; then
+        mkdir -p /sys/fs/cgroup/cpu,cpuacct
+        mkdir -p /sys/fs/cgroup/net_cls,net_prio
+
+        mount -n -t cgroup cgroup /sys/fs/cgroup/cpu,cpuacct -o rw,nosuid,nodev,noexec,relatime,cpu,cpuacct
+        mount -n -t cgroup cgroup /sys/fs/cgroup/net_cls,net_prio -o rw,nosuid,nodev,noexec,relatime,net_cls,net_prio
+
+        if ! mountinfo -q /sys/fs/cgroup/openrc; then
+            local agent="${RC_LIBEXECDIR}/sh/cgroup-release-agent.sh"
+            mkdir -p /sys/fs/cgroup/openrc
+            mount -n -t cgroup -o none,nodev,noexec,nosuid,name=systemd,release_agent="$agent" openrc /sys/fs/cgroup/openrc
+        fi
+    fi
+
+    return 0
+}
+EOF
+
+enable_service docker
+
+create_service docker-compose <<'EOF'
+#!/sbin/openrc-run
+
+name=$RC_SVCNAME
+description="Docker Compose Application Service"
+
+depend() {
+	after cgroups-patch
+	need cgroups-patch
+}
+
+start() {
+	ebegin "Starting $RC_SVCNAME"
+	cd /appdata
+	/usr/local/bin/docker-compose up -d --remove-orphans --wait
+	eend $?
+}
+
+stop() {
+	ebegin "Stopping $RC_SVCNAME"
+	cd /appdata
+	/usr/local/bin/docker-compose down
+	eend $?
+}
+EOF
+
+extra_commands
