@@ -51,6 +51,7 @@ EXAMPLE:
   create-docker-ct my-service alpine-3.16-default_20220622_amd64.tar.xz
   create-docker-ct my-service alpine-3.15-default_20211202_amd64.tar.xz
   create-docker-ct my-service ubuntu-22.04-standard_22.04-1_amd64.tar.zst
+  create-docker-ct my-service debian-12-standard_12.0-1_amd64.tar.zst
 ```
 
 Run this script:
