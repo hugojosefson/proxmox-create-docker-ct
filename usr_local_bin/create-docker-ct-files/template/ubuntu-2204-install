@@ -49,5 +49,7 @@ echo "
 docker --version
 /usr/local/bin/docker-compose --version
 
+apt-get install -y unattended-upgrades
+
 extra_commands
 apt-get clean
