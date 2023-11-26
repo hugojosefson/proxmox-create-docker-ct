@@ -3,7 +3,7 @@ set -xe
 
 # Type any extra commands inside this function. They will run last.
 extra_commands() {
-  apk --no-cache add byobu neovim
+  apk --no-cache add byobu musl-locales neovim
   byobu-enable
   ln -sf "$(command -v nvim)" /usr/local/bin/vim
 }

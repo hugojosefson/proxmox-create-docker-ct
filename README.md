@@ -41,15 +41,13 @@ curl -sSfL https://github.com/hugojosefson/proxmox-create-docker-ct/tarball/main
 USAGE:
 
   create-docker-ct --help                              This help message
-  create-docker-ct <name>                              Create a CT from alpine-3.17-default_20221129_amd64.tar.xz
+  create-docker-ct <name>                              Create a CT from alpine-3.18-default_20230607_amd64.tar.xz
   create-docker-ct <name> [<base_template_filename>]   Create a CT from specified base template
 
 EXAMPLE:
 
   create-docker-ct my-service
-  create-docker-ct my-service alpine-3.17-default_20221129_amd64.tar.xz
-  create-docker-ct my-service alpine-3.16-default_20220622_amd64.tar.xz
-  create-docker-ct my-service alpine-3.15-default_20211202_amd64.tar.xz
+  create-docker-ct my-service alpine-3.18-default_20230607_amd64.tar.xz
   create-docker-ct my-service ubuntu-22.04-standard_22.04-1_amd64.tar.zst
   create-docker-ct my-service debian-12-standard_12.0-1_amd64.tar.zst
 ```

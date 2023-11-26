@@ -22,9 +22,6 @@ import { VMID } from "./os.ts";
 /** template filenames we support. the first one is default if user does not specify. */
 const compatibleTemplates = [
   "alpine-3.18-default_20230607_amd64.tar.xz",
-  "alpine-3.17-default_20221129_amd64.tar.xz",
-  "alpine-3.16-default_20220622_amd64.tar.xz",
-  "alpine-3.15-default_20211202_amd64.tar.xz",
   "ubuntu-22.04-standard_22.04-1_amd64.tar.zst",
   "debian-12-standard_12.0-1_amd64.tar.zst",
 ];
