@@ -28,7 +28,9 @@ async function getAppdataDir(
     ],
   );
   if (!path) {
-    throw new Error(`Could not find path or mountpoint for storage ${storage.name}.`);
+    throw new Error(
+      `Could not find path or mountpoint for storage ${storage.name}.`,
+    );
   }
 
   return `${path}/appdata/${options.name}`;
