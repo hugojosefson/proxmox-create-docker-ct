@@ -19,17 +19,18 @@ async function getAppdataDir(
   options: Pick<CtTemplateOptions, "name">,
 ) {
   const path = extractValueFromPveShGet(
-    "path",
-    await run([
-      "pvesh",
-      "get",
-      `/storage/${storage.name}`,
-    ]),
+    await run(
+      ["pvesh", "get", `/storage/${storage.name}`],
+    ),
+    [
+      "path",
+      "mountpoint",
+    ],
   );
-
   if (!path) {
-    throw new Error(`Could not find path for storage ${storage.name}.`);
+    throw new Error(`Could not find path or mountpoint for storage ${storage.name}.`);
   }
+
   return `${path}/appdata/${options.name}`;
 }
 
