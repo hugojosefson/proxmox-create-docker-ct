@@ -10,9 +10,23 @@ extra_commands() {
 
 create_executable() {
 	filename="$1"
-	mkdir -p "$(dirname "${filename}")"
-	cat > "${filename}"
-	chmod +x "${filename}"
+  create_file "${filename}"
+  chmod +x "${filename}"
+}
+
+create_file() {
+  filename="$1"
+  mkdir -p "$(dirname "${filename}")"
+  cat > "${filename}"
+}
+
+create_file_if_not_exists() {
+	filename="$1"
+	if [ ! -e "${filename}" ]; then
+    create_file "${filename}"
+	else
+	  cat > /dev/null
+	fi
 }
 
 enable_service() {
@@ -46,45 +60,9 @@ DOCKER_COMPOSE_VERSION="$(curl -sSfL https://semver-version.deno.dev/api/github/
 curl -sSfL -o /usr/local/bin/docker-compose "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-linux-x86_64"
 chmod +x /usr/local/bin/docker-compose
 
-mkdir -p /appdata
-
 enable_service local
 enable_service sshd
-
-create_service cgroups-patch <<'EOF'
-#!/sbin/openrc-run
-
-description="Mount the control groups for Docker"
-# via https://wildwolf.name/how-to-run-docker-in-alpine-container-in-lxc-lxd/
-
-depend()
-{
-    keyword -docker
-    need sysfs cgroups
-}
-
-start()
-{
-    if [ -d /sys/fs/cgroup ]; then
-        mkdir -p /sys/fs/cgroup/cpu,cpuacct
-        mkdir -p /sys/fs/cgroup/net_cls,net_prio
-
-        mount -n -t cgroup cgroup /sys/fs/cgroup/cpu,cpuacct -o rw,nosuid,nodev,noexec,relatime,cpu,cpuacct
-        mount -n -t cgroup cgroup /sys/fs/cgroup/net_cls,net_prio -o rw,nosuid,nodev,noexec,relatime,net_cls,net_prio
-
-        if ! mountinfo -q /sys/fs/cgroup/openrc; then
-            local agent="${RC_LIBEXECDIR}/sh/cgroup-release-agent.sh"
-            mkdir -p /sys/fs/cgroup/openrc
-            mount -n -t cgroup -o none,nodev,noexec,nosuid,name=systemd,release_agent="$agent" openrc /sys/fs/cgroup/openrc
-        fi
-    fi
-
-    return 0
-}
-EOF
-
 enable_service docker
-
 create_service docker-compose <<'EOF'
 #!/sbin/openrc-run
 
@@ -92,14 +70,14 @@ name=$RC_SVCNAME
 description="Docker Compose Application Service"
 
 depend() {
-	after cgroups-patch
-	need cgroups-patch
+	after docker
+	need docker
 }
 
 start() {
 	ebegin "Starting $RC_SVCNAME"
 	cd /appdata
-	/usr/local/bin/docker-compose up -d --remove-orphans --wait
+	/usr/local/bin/docker-compose up --detach --remove-orphans --pull=always --wait
 	eend $?
 }
 
@@ -111,4 +89,19 @@ stop() {
 }
 EOF
 
+create_file_if_not_exists /appdata/docker-compose.yml <<'EOF'
+services:
+  app:
+    image: docker.io/traefik/whoami
+    environment:
+      - PORT="80"
+    ports: [ "80:80" ]
+    # volumes:
+    #   - /appdata/data:/data:ro    # left side is inside lxc, right is inside docker
+EOF
+fi
+
+start_service sshd
+start_service docker
+start_service docker-compose
 extra_commands
