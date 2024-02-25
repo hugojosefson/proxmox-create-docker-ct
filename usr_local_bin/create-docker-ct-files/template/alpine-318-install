@@ -40,11 +40,6 @@ create_service() {
 	enable_service "${name}"
 }
 
-start_service() {
-  name="$1"
-  rc-service "${name}" start
-}
-
 create_executable "/etc/local.d/update-issue.start" <<'EOF'
 #!/bin/sh
 set -e
@@ -105,8 +100,8 @@ services:
     #   - /appdata/data:/data:ro    # left side is inside lxc, right is inside docker
 EOF
 
-start_service local
-start_service sshd
-start_service docker
-start_service docker-compose
+rc-service local          start
+rc-service sshd           start
+rc-service docker         start
+rc-service docker-compose start
 extra_commands
