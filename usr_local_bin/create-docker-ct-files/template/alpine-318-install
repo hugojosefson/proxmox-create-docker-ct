@@ -101,6 +101,7 @@ services:
 EOF
 fi
 
+start_service local
 start_service sshd
 start_service docker
 start_service docker-compose
