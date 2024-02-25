@@ -40,6 +40,11 @@ create_service() {
 	enable_service "${name}"
 }
 
+start_service() {
+  name="$1"
+  rc-service "${name}" start
+}
+
 create_executable "/etc/local.d/update-issue.start" <<'EOF'
 #!/bin/sh
 set -e
