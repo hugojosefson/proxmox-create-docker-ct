@@ -99,7 +99,6 @@ services:
     # volumes:
     #   - /appdata/data:/data:ro    # left side is inside lxc, right is inside docker
 EOF
-fi
 
 start_service local
 start_service sshd
