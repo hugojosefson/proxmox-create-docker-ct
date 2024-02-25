@@ -100,8 +100,4 @@ services:
     #   - /appdata/data:/data:ro    # left side is inside lxc, right is inside docker
 EOF
 
-rc-service local          start
-rc-service sshd           start
-rc-service docker         start
-rc-service docker-compose start
 extra_commands
