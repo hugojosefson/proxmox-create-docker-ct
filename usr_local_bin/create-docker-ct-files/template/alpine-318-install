@@ -93,7 +93,7 @@ start_pre() {
 
   if ! docker info 2>/dev/null >/dev/null; then
     ebegin "Waiting for Docker daemon to be ready..."
-    timeout 15 sh -c 'until docker info 2>/dev/null >/dev/null; do printf . >&2; sleep 1; done;'
+    timeout 15 sh -c 'until docker info 2>/dev/null >/dev/null; do sleep 1; done;'
     if [ $? -eq 0 ]; then
       eend 0 "Docker daemon is ready"
     else
