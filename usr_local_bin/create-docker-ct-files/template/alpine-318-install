@@ -74,6 +74,42 @@ depend() {
 	need docker
 }
 
+checkconfig() {
+  cd /appdata
+  /usr/local/bin/docker-compose config --quiet
+}
+
+start_pre() {
+  # If this isn't a restart, make sure that the user's config isn't
+  # busted before we try to start the daemon (this will produce
+  # better error messages than if we just try to start it blindly).
+  #
+  # If, on the other hand, this *is* a restart, then the stop_pre
+  # action will have ensured that the config is usable and we don't
+  # need to do that again.
+  if [ "${RC_CMD}" != "restart" ] ; then
+    checkconfig || return $?
+  fi
+
+  if ! docker info 2>/dev/null >/dev/null; then
+    ebegin "Waiting for Docker daemon to be ready..."
+    timeout 15 sh -c 'until docker info 2>/dev/null >/dev/null; do printf . >&2; sleep 1; done;'
+    if [ $? -eq 0 ]; then
+      eend 0 "Docker daemon is ready"
+    else
+      eend 1 "Docker daemon is not ready"
+    fi
+  fi
+}
+
+stop_pre() {
+  # If this is a restart, check to make sure the user's config
+  # isn't busted before we stop the running daemon.
+  if [ "${RC_CMD}" = "restart" ] ; then
+      checkconfig || return $?
+  fi
+}
+
 start() {
 	ebegin "Starting $RC_SVCNAME"
 	cd /appdata
